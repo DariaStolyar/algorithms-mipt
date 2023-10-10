@@ -1,11 +1,13 @@
+// В задаче необходимо вычислить среднее геометрическое на отрезке по нескольким запросам
+
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
-const int kPrecision = 10;
 
 int main() {
+  const int kPrecision = 10;
   size_t cnt_mandrake;
   std::cin >> cnt_mandrake;
 

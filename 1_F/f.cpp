@@ -1,12 +1,10 @@
+// В задаче необходимо вывести k-порядковую статистику
+
 #include <iostream>
 #include <random>
 #include <vector>
 
 std::mt19937 choose_pivot(time(nullptr));
-const int kElem = 2;
-const int kNum123 = 123;
-const int kNum45 = 45;
-const int kNum1e7 = 1e7 + 4321;
 
 std::pair<size_t, size_t> Partition(std::vector<int>& first_list, size_t start,
                                     size_t finish) {
@@ -50,6 +48,10 @@ int QuickSelect(std::vector<int>& first_list, size_t start, size_t finish,
 }
 
 int main() {
+  const int kElem = 2;
+  const int kNum123 = 123;
+  const int kNum45 = 45;
+  const int kNum1e7 = 1e7 + 4321;
   size_t cnt_elem_list;
   size_t ord_stat;
   std::cin >> cnt_elem_list >> ord_stat;

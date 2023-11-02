@@ -1,8 +1,8 @@
 // В задаче необходимо отсортировать массив поразрядной сортировкой по байтам
 
 #include <iostream>
-#include <vector>
 #include <numeric>
+#include <vector>
 
 size_t ByteOfNumber(unsigned long long number, size_t byte) {
   const size_t kBit = 256;
@@ -21,7 +21,8 @@ void LSDSort(std::vector<unsigned long long>& array) {
       size_t j_byte = ByteOfNumber(array[j], i);
       ++counts_of_numbers[j_byte];
     }
-    std::partial_sum(counts_of_numbers.begin(), counts_of_numbers.end(),indexes.begin());
+    std::partial_sum(counts_of_numbers.begin(), counts_of_numbers.end(),
+                     indexes.begin());
     for (int j = array.size() - 1; j >= 0; --j) {
       size_t j_byte = ByteOfNumber(array[j], i);
       sorted[indexes[j_byte] - 1] = array[j];

@@ -2,44 +2,44 @@
 
 #include <iostream>
 #include <vector>
+#include <numeric>
 
-int ByteOfNumber(unsigned long long number, size_t byte) {
-  const int kBit = 256;
-  const int kByte = 8;
+size_t ByteOfNumber(unsigned long long number, size_t byte) {
+  const size_t kBit = 256;
+  const size_t kByte = 8;
   return (number >> (byte * kByte)) & (kBit - 1);
 }
 
 void LSDSort(std::vector<unsigned long long>& array) {
-  const int kBit = 256;
-  const int kByte = 8;
+  const size_t kBit = 256;
+  const size_t kByte = 8;
   for (size_t i = 0; i < kByte; ++i) {
-    std::vector<unsigned long long> vector_byte(kBit, 0);
-    std::vector<unsigned long long> new_array(array.size(), 0);
-    std::vector<unsigned long long> array_byte(array.size(), 0);
+    std::vector<unsigned long long> counts_of_numbers(kBit, 0);
+    std::vector<unsigned long long> indexes(kBit, 0);
+    std::vector<unsigned long long> sorted(array.size(), 0);
     for (size_t j = 0; j < array.size(); ++j) {
-      array_byte[j] = ByteOfNumber(array[j], i);
-      ++vector_byte[array_byte[j]];
+      size_t j_byte = ByteOfNumber(array[j], i);
+      ++counts_of_numbers[j_byte];
     }
-    for (size_t j = 1; j < kBit; ++j) {
-      vector_byte[j] += vector_byte[j - 1];
-    }
+    std::partial_sum(counts_of_numbers.begin(), counts_of_numbers.end(),indexes.begin());
     for (int j = array.size() - 1; j >= 0; --j) {
-      new_array[vector_byte[array_byte[j]] - 1] = array[j];
-      --vector_byte[array_byte[j]];
+      size_t j_byte = ByteOfNumber(array[j], i);
+      sorted[indexes[j_byte] - 1] = array[j];
+      --indexes[j_byte];
     }
-    array = new_array;
+    array = sorted;
   }
 }
 
 int main() {
-  size_t array_length;
-  std::cin >> array_length;
-  std::vector<unsigned long long> array(array_length);
-  for (size_t i = 0; i < array_length; ++i) {
+  size_t length;
+  std::cin >> length;
+  std::vector<unsigned long long> array(length);
+  for (size_t i = 0; i < length; ++i) {
     std::cin >> array[i];
   }
   LSDSort(array);
-  for (size_t i = 0; i < array_length; ++i) {
+  for (size_t i = 0; i < length; ++i) {
     std::cout << array[i] << "\n";
   }
   return 0;

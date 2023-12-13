@@ -1,12 +1,16 @@
+// В задаче необходимо написать очередь с поддержкой минимума
+
 #include <iostream>
 #include <stack>
 #include <string>
 
 struct Hat {
+  const int kMinValue = -1e9;
   std::stack<int> begin_queue;
   std::stack<int> end_queue;
   std::stack<int> end_queue_min;
   std::stack<int> begin_queue_min;
+
   void Correction() {
     while (!end_queue.empty()) {
       begin_queue.push(end_queue.top());
@@ -19,18 +23,17 @@ struct Hat {
       end_queue_min.pop();
     }
   }
-  bool Front() {
+
+  int Front() {
     if (end_queue.empty() && begin_queue.empty()) {
-      std::cout << "error"
-                << "\n";
-      return false;
+      return kMinValue;
     }
     if (begin_queue.empty()) {
       Correction();
     }
-    std::cout << begin_queue.top() << "\n";
-    return true;
+    return begin_queue.top();
   }
+
   void PrintMin() {
     if (end_queue_min.empty() && begin_queue_min.empty()) {
       std::cout << "error"
@@ -43,6 +46,7 @@ struct Hat {
       std::cout << std::min(begin_queue_min.top(), end_queue_min.top()) << "\n";
     }
   }
+
   void ClearHat() {
     size_t size_begin = begin_queue.size();
     size_t size_end = end_queue.size();
@@ -60,12 +64,15 @@ struct Hat {
 };
 
 int main() {
+  const int kMinValue = -1e9;
   size_t count_query;
   std::cin >> count_query;
   Hat hat;
+
   for (size_t i = 0; i < count_query; ++i) {
     std::string type_query;
     std::cin >> type_query;
+
     if (type_query == "enqueue") {
       int new_element;
       std::cin >> new_element;
@@ -78,21 +85,33 @@ int main() {
       std::cout << "ok"
                 << "\n";
     }
+
     if (type_query == "front") {
-      hat.Front();
-    }
-    if (type_query == "dequeue") {
-      if (hat.Front()) {
-        hat.begin_queue.pop();
-        hat.begin_queue_min.pop();
+      if (hat.Front() != kMinValue) {
+        std::cout << hat.Front() << "\n";
+      } else {
+        std::cout << "error\n";
       }
     }
+
+    if (type_query == "dequeue") {
+      if (hat.Front() != kMinValue) {
+        std::cout << hat.Front() << "\n";
+        hat.begin_queue.pop();
+        hat.begin_queue_min.pop();
+      } else {
+        std::cout << "error\n";
+      }
+    }
+
     if (type_query == "size") {
       std::cout << hat.begin_queue.size() + hat.end_queue.size() << "\n";
     }
+
     if (type_query == "clear") {
       hat.ClearHat();
     }
+
     if (type_query == "min") {
       hat.PrintMin();
     }

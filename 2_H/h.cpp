@@ -2,77 +2,85 @@
 #include <string>
 #include <vector>
 
-struct Heaps {
+class Heaps {
+ public:
   std::vector<long long> min_heap;
   std::vector<long long> max_heap;
-  long long last_index_of_heap = 0;
+  size_t last_index_of_heap = 0;
   std::vector<long long> max_to_min;
   std::vector<long long> min_to_max;
-  void MinSiftUp(long long index_element) {
+  Heaps() {
+    const int kNumber = 10e6;
+    max_to_min.resize(kNumber + 1, 0);
+    min_to_max.resize(kNumber + 1, 0);
+    min_heap.push_back(0);
+    max_heap.push_back(0);
+  }
+  void SwapMin(size_t first_index, size_t second_index) {
+    std::swap(min_heap[first_index], min_heap[second_index]);
+    std::swap(min_to_max[first_index], min_to_max[second_index]);
+    max_to_min[min_to_max[second_index]] = second_index;
+    max_to_min[min_to_max[first_index]] = first_index;
+  }
+  void SwapMax(size_t first_index, size_t second_index) {
+    std::swap(max_heap[first_index], max_heap[second_index]);
+    std::swap(max_to_min[first_index], max_to_min[second_index]);
+    min_to_max[max_to_min[second_index]] = second_index;
+    min_to_max[max_to_min[first_index]] = first_index;
+  }
+  void MinSiftUp(size_t index_element) {
     if (index_element == 1) {
       return;
     }
     long long parent = index_element / 2;
     if (min_heap[index_element] < min_heap[parent]) {
-      std::swap(min_heap[index_element], min_heap[parent]);
-      std::swap(min_to_max[index_element], min_to_max[parent]);
-      max_to_min[min_to_max[parent]] = parent;
-      max_to_min[min_to_max[index_element]] = index_element;
+      SwapMin(index_element, parent);
       MinSiftUp(parent);
     }
   }
 
-  void MaxSiftUp(long long index_element) {
+  void MaxSiftUp(size_t index_element) {
     if (index_element == 1) {
       return;
     }
-    long long parent = index_element / 2;
+    size_t parent = index_element / 2;
     if (max_heap[index_element] > max_heap[parent]) {
-      std::swap(max_heap[index_element], max_heap[parent]);
-      std::swap(max_to_min[index_element], max_to_min[parent]);
-      min_to_max[max_to_min[parent]] = parent;
-      min_to_max[max_to_min[index_element]] = index_element;
+      SwapMax(index_element, parent);
       MaxSiftUp(parent);
     }
   }
 
-  void MinSiftDown(long long index_element) {
+  void MinSiftDown(size_t index_element) {
     if (2 * index_element > last_index_of_heap) {
       return;
     }
-    long long last_element = last_index_of_heap;
-    long long child = 2 * index_element;
+    size_t last_element = last_index_of_heap;
+    size_t child = 2 * index_element;
     if (child + 1 <= last_element && min_heap[child + 1] < min_heap[child]) {
-      child += 1;
+      ++child;
     }
     if (min_heap[child] < min_heap[index_element]) {
-      std::swap(min_heap[index_element], min_heap[child]);
-      std::swap(min_to_max[index_element], min_to_max[child]);
-      max_to_min[min_to_max[child]] = child;
-      max_to_min[min_to_max[index_element]] = index_element;
+      SwapMin(index_element, child);
       MinSiftDown(child);
     }
   }
 
-  void MaxSiftDown(long long index_element) {
+  void MaxSiftDown(size_t index_element) {
     if (2 * index_element > last_index_of_heap) {
       return;
     }
-    long long last_element = last_index_of_heap;
-    long long child = 2 * index_element;
+    size_t last_element = last_index_of_heap;
+    size_t child = 2 * index_element;
     if (child + 1 <= last_element && max_heap[child + 1] > max_heap[child]) {
-      child += 1;
+      ++child;
     }
     if (max_heap[child] > max_heap[index_element]) {
-      std::swap(max_heap[index_element], max_heap[child]);
-      std::swap(max_to_min[index_element], max_to_min[child]);
-      min_to_max[max_to_min[child]] = child;
-      min_to_max[max_to_min[index_element]] = index_element;
+      SwapMax(index_element, child);
       MaxSiftDown(child);
     }
   }
 
-  void Insert(long long new_element) {
+  void Insert(size_t new_element) {
     min_heap.push_back(new_element);
     max_heap.push_back(new_element);
     last_index_of_heap += 1;
@@ -83,18 +91,12 @@ struct Heaps {
   }
 
   void ExtractMin() {
-    long long last = last_index_of_heap;
+    size_t last = last_index_of_heap;
     size_t first = 1;
     int index_in_max = min_to_max[1];
-    std::swap(min_heap[first], min_heap[last]);
-    std::swap(min_to_max[first], min_to_max[last]);
-    max_to_min[min_to_max[last]] = last;
-    max_to_min[min_to_max[first]] = first;
+    SwapMin(first, last);
     min_heap.pop_back();
-    std::swap(max_heap[index_in_max], max_heap[last]);
-    std::swap(max_to_min[index_in_max], max_to_min[last]);
-    min_to_max[max_to_min[last]] = last;
-    min_to_max[max_to_min[index_in_max]] = index_in_max;
+    SwapMax(index_in_max, last);
     max_heap.pop_back();
     last_index_of_heap -= 1;
     MinSiftDown(first);
@@ -102,18 +104,12 @@ struct Heaps {
   }
 
   void ExtractMax() {
-    long long last = last_index_of_heap;
+    size_t last = last_index_of_heap;
     size_t first = 1;
     int index_in_min = max_to_min[1];
-    std::swap(max_heap[first], max_heap[last]);
-    std::swap(max_to_min[first], max_to_min[last]);
-    min_to_max[max_to_min[last]] = last;
-    min_to_max[max_to_min[first]] = first;
+    SwapMax(first, last);
     max_heap.pop_back();
-    std::swap(min_heap[index_in_min], min_heap[last]);
-    std::swap(min_to_max[index_in_min], min_to_max[last]);
-    max_to_min[min_to_max[last]] = last;
-    max_to_min[min_to_max[index_in_min]] = index_in_min;
+    SwapMin(index_in_min, last);
     min_heap.pop_back();
     last_index_of_heap -= 1;
     MaxSiftDown(first);
@@ -123,7 +119,7 @@ struct Heaps {
   void Clear() {
     std::cout << "ok"
               << "\n";
-    for (int i = 0; i < last_index_of_heap; ++i) {
+    for (size_t i = 0; i < last_index_of_heap; ++i) {
       max_heap.pop_back();
       min_heap.pop_back();
       min_to_max[i] = 0;
@@ -185,7 +181,7 @@ struct Heaps {
   }
 };
 
-void Speed() {
+void BoostIO() {
   std::ios::sync_with_stdio(false);
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(0);
@@ -193,15 +189,10 @@ void Speed() {
 }
 
 int main() {
-  Speed();
-  const int kNumber = 10e6;
+  BoostIO();
   size_t count_query;
   std::cin >> count_query;
   Heaps heaps;
-  heaps.max_to_min.resize(kNumber + 1, 0);
-  heaps.min_to_max.resize(kNumber + 1, 0);
-  heaps.min_heap.push_back(0);
-  heaps.max_heap.push_back(0);
   for (size_t i = 0; i < count_query; ++i) {
     heaps.Query();
   }

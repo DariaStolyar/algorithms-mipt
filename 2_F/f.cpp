@@ -5,7 +5,7 @@
 class Heap {
  public:
   std::vector<long long> binary_heap;
-  long long last_index_of_heap = 0;
+  size_t last_index_of_heap = 0;
   std::vector<long long> heap_to_queries;
   std::vector<long long> queries;
   Heap() {
@@ -14,13 +14,13 @@ class Heap {
     heap_to_queries.resize(kNumber + 1, 0);
     binary_heap.push_back(0);
   }
-  void Swap(long long first_index, long long second_index) {
+  void Swap(size_t first_index, size_t second_index) {
     std::swap(binary_heap[first_index], binary_heap[second_index]);
     std::swap(heap_to_queries[first_index], heap_to_queries[second_index]);
     queries[heap_to_queries[second_index]] = second_index;
     queries[heap_to_queries[first_index]] = first_index;
   }
-  void SiftUp(long long index_element) {
+  void SiftUp(size_t index_element) {
     if (index_element == 1) {
       return;
     }
@@ -30,7 +30,7 @@ class Heap {
       SiftUp(parent);
     }
   }
-  void SiftDown(long long index_element) {
+  void SiftDown(size_t index_element) {
     if (2 * index_element > last_index_of_heap) {
       return;
     }
@@ -65,7 +65,7 @@ class Heap {
     SiftDown(first);
   }
 
-  void DecreaseKey(long long index_query, long long delta) {
+  void DecreaseKey(size_t index_query, long long delta) {
     long long index_element = queries[index_query];
     binary_heap[index_element] -= delta;
     SiftUp(index_element);

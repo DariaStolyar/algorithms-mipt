@@ -4,67 +4,84 @@
 #include <stack>
 #include <string>
 
-struct Hat {
-  const int kMinValue = -1e9;
-  std::stack<int> begin_queue;
-  std::stack<int> end_queue;
-  std::stack<int> end_queue_min;
-  std::stack<int> begin_queue_min;
+class Hat {
+ private:
+  std::stack<int> begin_queue_;
+  std::stack<int> end_queue_;
+  std::stack<int> end_queue_min_;
+  std::stack<int> begin_queue_min_;
 
   void Correction() {
-    while (!end_queue.empty()) {
-      begin_queue.push(end_queue.top());
-      if (begin_queue_min.empty()) {
-        begin_queue_min.push(end_queue.top());
+    while (!end_queue_.empty()) {
+      begin_queue_.push(end_queue_.top());
+      if (begin_queue_min_.empty()) {
+        begin_queue_min_.push(end_queue_.top());
       } else {
-        begin_queue_min.push(std::min(begin_queue_min.top(), end_queue.top()));
+        begin_queue_min_.push(
+            std::min(begin_queue_min_.top(), end_queue_.top()));
       }
-      end_queue.pop();
-      end_queue_min.pop();
+      end_queue_.pop();
+      end_queue_min_.pop();
     }
   }
 
+ public:
+  bool HaveFront() { return !(end_queue_.empty() && begin_queue_.empty()); }
+
   int Front() {
-    if (end_queue.empty() && begin_queue.empty()) {
-      return kMinValue;
-    }
-    if (begin_queue.empty()) {
+    if (begin_queue_.empty()) {
       Correction();
     }
-    return begin_queue.top();
+    return begin_queue_.top();
   }
 
   void PrintMin() {
-    if (end_queue_min.empty() && begin_queue_min.empty()) {
+    if (end_queue_min_.empty() && begin_queue_min_.empty()) {
       std::cout << "error"
                 << "\n";
-    } else if (end_queue_min.empty()) {
-      std::cout << begin_queue_min.top() << "\n";
-    } else if (begin_queue_min.empty()) {
-      std::cout << end_queue_min.top() << "\n";
+    } else if (end_queue_min_.empty()) {
+      std::cout << begin_queue_min_.top() << "\n";
+    } else if (begin_queue_min_.empty()) {
+      std::cout << end_queue_min_.top() << "\n";
     } else {
-      std::cout << std::min(begin_queue_min.top(), end_queue_min.top()) << "\n";
+      std::cout << std::min(begin_queue_min_.top(), end_queue_min_.top())
+                << "\n";
     }
   }
 
   void ClearHat() {
-    size_t size_begin = begin_queue.size();
-    size_t size_end = end_queue.size();
+    size_t size_begin = begin_queue_.size();
+    size_t size_end = end_queue_.size();
     for (size_t j = 0; j < size_begin; ++j) {
-      begin_queue.pop();
-      begin_queue_min.pop();
+      begin_queue_.pop();
+      begin_queue_min_.pop();
     }
     for (size_t j = 0; j < size_end; ++j) {
-      end_queue.pop();
-      end_queue_min.pop();
+      end_queue_.pop();
+      end_queue_min_.pop();
     }
     std::cout << "ok"
               << "\n";
   }
+
+  void Enqueue(int new_element) {
+    end_queue_.push(new_element);
+    if (end_queue_min_.empty()) {
+      end_queue_min_.push(new_element);
+    } else {
+      end_queue_min_.push(std::min(end_queue_min_.top(), new_element));
+    }
+  }
+
+  size_t Size() { return begin_queue_.size() + end_queue_.size(); }
+
+  void Dequeue() {
+    begin_queue_.pop();
+    begin_queue_min_.pop();
+  }
 };
 
 int main() {
-  const int kMinValue = -1e9;
   size_t count_query;
   std::cin >> count_query;
   Hat hat;
@@ -76,18 +93,13 @@ int main() {
     if (type_query == "enqueue") {
       int new_element;
       std::cin >> new_element;
-      hat.end_queue.push(new_element);
-      if (hat.end_queue_min.empty()) {
-        hat.end_queue_min.push(new_element);
-      } else {
-        hat.end_queue_min.push(std::min(hat.end_queue_min.top(), new_element));
-      }
+      hat.Enqueue(new_element);
       std::cout << "ok"
                 << "\n";
     }
 
     if (type_query == "front") {
-      if (hat.Front() != kMinValue) {
+      if (hat.HaveFront()) {
         std::cout << hat.Front() << "\n";
       } else {
         std::cout << "error\n";
@@ -95,17 +107,16 @@ int main() {
     }
 
     if (type_query == "dequeue") {
-      if (hat.Front() != kMinValue) {
+      if (hat.HaveFront()) {
         std::cout << hat.Front() << "\n";
-        hat.begin_queue.pop();
-        hat.begin_queue_min.pop();
+        hat.Dequeue();
       } else {
         std::cout << "error\n";
       }
     }
 
     if (type_query == "size") {
-      std::cout << hat.begin_queue.size() + hat.end_queue.size() << "\n";
+      std::cout << hat.Size() << "\n";
     }
 
     if (type_query == "clear") {

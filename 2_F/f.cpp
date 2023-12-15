@@ -63,10 +63,7 @@ class Heap {
   void ExtractMin() {
     size_t last = last_index_;
     size_t first = 1;
-    std::swap(heap_[first], heap_[last]);
-    std::swap(to_queries_[first], to_queries_[last]);
-    queries_[to_queries_[last]] = last;
-    queries_[to_queries_[first]] = first;
+    Swap(first, last);
     heap_.pop_back();
     last_index_ -= 1;
     SiftDown(first);
@@ -93,25 +90,25 @@ int main() {
   size_t count_query;
   std::cin >> count_query;
   Heap heap(count_query);
- 
+
   for (size_t i = 0; i < count_query; ++i) {
     std::string type_query;
     std::cin >> type_query;
-   
+
     if (type_query == "getMin") {
       std::cout << heap.GetMin() << "\n";
     }
-   
+
     if (type_query == "insert") {
       int new_element;
       std::cin >> new_element;
       heap.Insert(i + 1, new_element);
     }
-   
+
     if (type_query == "extractMin") {
       heap.ExtractMin();
     }
-   
+
     if (type_query == "decreaseKey") {
       size_t index_query;
       long long delta;

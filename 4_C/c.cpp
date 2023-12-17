@@ -1,3 +1,6 @@
+// В задаче необходимо реализовать структуру, 
+// сопоставляющую две строки друг другу
+
 #include <algorithm>
 #include <iostream>
 #include <random>

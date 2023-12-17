@@ -1,3 +1,6 @@
+// В задаче необходимо реализовать декартово дерево с операциями:
+// insert, delete, exists, next, prev, kth(k-ая пор. статистика)
+
 #include <algorithm>
 #include <iostream>
 #include <random>

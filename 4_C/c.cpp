@@ -1,4 +1,4 @@
-// В задаче необходимо реализовать структуру, 
+// В задаче необходимо реализовать структуру,
 // сопоставляющую две строки друг другу
 
 #include <algorithm>
@@ -8,35 +8,35 @@
 #include <vector>
 
 struct Node {
-  std::string value;
+  std::string key;
   int priority = rand();
-  std::string second_value;
+  std::string value;
   Node* left_son = nullptr;
   Node* right_son = nullptr;
 };
 
 std::vector<Node*> all_nodes;
 
-Node* Merge(Node* head1, Node* head2) {
-  if (head1 == nullptr) {
-    return head2;
+Node* Merge(Node* left, Node* right) {
+  if (left == nullptr) {
+    return right;
   }
-  if (head2 == nullptr) {
-    return head1;
+  if (right == nullptr) {
+    return left;
   }
-  if (head1->priority < head2->priority) {
-    head1->right_son = Merge(head1->right_son, head2);
-    return head1;
+  if (left->priority < right->priority) {
+    left->right_son = Merge(left->right_son, right);
+    return left;
   }
-  head2->left_son = Merge(head1, head2->left_son);
-  return head2;
+  right->left_son = Merge(left, right->left_son);
+  return right;
 }
 
 std::pair<Node*, Node*> Split(Node* head, std::string value) {
   if (head == nullptr) {
     return {nullptr, nullptr};
   }
-  if (head->value <= value) {
+  if (head->key <= value) {
     if (head->right_son == nullptr) {
       return {head, nullptr};
     }
@@ -52,44 +52,43 @@ std::pair<Node*, Node*> Split(Node* head, std::string value) {
   return {result.first, head};
 }
 
-bool Exist(Node* head, std::string element) {
+Node* Exist(Node* head, std::string element) {
   Node* node = head;
   if (head == nullptr) {
-    return false;
+    return nullptr;
   }
   while (node != nullptr) {
-    if (node->value == element) {
-      std::cout << node->second_value << "\n";
-      return true;
+    if (node->key == element) {
+      return node;
     }
-    if (node->value < element) {
+    if (node->key < element) {
       if (node->right_son == nullptr) {
-        return false;
+        return nullptr;
       }
       node = node->right_son;
       continue;
     }
     if (node->left_son == nullptr) {
-      return false;
+      return nullptr;
     }
     node = node->left_son;
   }
-  return false;
+  return nullptr;
 }
 
 Node* Insert(Node* head, std::string new_element, std::string value) {
-  if (Exist(head, new_element)) {
+  if (Exist(head, new_element) != nullptr) {
     return head;
   }
   std::pair<Node*, Node*> result = Split(head, new_element);
   Node* node = new Node;
-  node->value = new_element;
-  node->second_value = value;
+  node->key = new_element;
+  node->value = value;
   all_nodes.push_back(node);
   return Merge(result.first, Merge(node, result.second));
 }
 
-void Speed() {
+void BoostIO() {
   std::ios::sync_with_stdio(false);
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(0);
@@ -97,7 +96,7 @@ void Speed() {
 }
 
 int main() {
-  Speed();
+  BoostIO();
   size_t count;
   std::cin >> count;
   Node* head1 = nullptr;
@@ -114,8 +113,11 @@ int main() {
   for (size_t i = 0; i < count_query; ++i) {
     std::string query;
     std::cin >> query;
-    Exist(head1, query);
-    Exist(head2, query);
+    if (Exist(head1, query) != nullptr) {
+      std::cout << Exist(head1, query)->value << "\n";
+    } else {
+      std::cout << Exist(head2, query)->value << "\n";
+    }
   }
   for (size_t i = 0; i < all_nodes.size(); ++i) {
     delete all_nodes[i];

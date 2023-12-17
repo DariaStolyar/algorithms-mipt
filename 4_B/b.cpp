@@ -1,3 +1,5 @@
+// В задаче необходимо реализовать AVL-дерево
+
 #include <algorithm>
 #include <iostream>
 #include <random>

@@ -1,4 +1,5 @@
- #include <algorithm>
+// В задаче необходимо найти площадь объединения прямоугольников
+#include <algorithm>
 #include <iostream>
 #include <vector>
 

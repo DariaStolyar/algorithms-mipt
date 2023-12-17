@@ -1,3 +1,4 @@
+// В задаче необходимо отвечать на запросы второй порядковой статистики на отрезках
 #include <algorithm>
 #include <iostream>
 #include <vector>

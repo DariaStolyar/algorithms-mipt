@@ -3,12 +3,13 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
 
 struct Node {
-  int value = 0;
+  int key = 0;
   int priority = rand();
   int size = 0;
   Node* left_son = nullptr;
@@ -16,7 +17,6 @@ struct Node {
 };
 
 std::vector<Node*> all_nodes;
-const int kMin = -1e9 - 1;
 
 void ChangeSize(Node* head) {
   if (head->left_son == nullptr and head->right_son == nullptr) {
@@ -30,28 +30,28 @@ void ChangeSize(Node* head) {
   }
 }
 
-Node* Merge(Node* head1, Node* head2) {
-  if (head1 == nullptr) {
-    return head2;
+Node* Merge(Node* left, Node* right) {
+  if (left == nullptr) {
+    return right;
   }
-  if (head2 == nullptr) {
-    return head1;
+  if (right == nullptr) {
+    return left;
   }
-  if (head1->priority < head2->priority) {
-    head1->right_son = Merge(head1->right_son, head2);
-    ChangeSize(head1);
-    return head1;
+  if (left->priority < right->priority) {
+    left->right_son = Merge(left->right_son, right);
+    ChangeSize(left);
+    return left;
   }
-  head2->left_son = Merge(head1, head2->left_son);
-  ChangeSize(head2);
-  return head2;
+  right->left_son = Merge(left, right->left_son);
+  ChangeSize(right);
+  return right;
 }
 
 std::pair<Node*, Node*> Split(Node* head, int value) {
   if (head == nullptr) {
     return {nullptr, nullptr};
   }
-  if (head->value <= value) {
+  if (head->key <= value) {
     if (head->right_son == nullptr) {
       return {head, nullptr};
     }
@@ -75,10 +75,10 @@ bool Exist(Node* head, int element) {
     return false;
   }
   while (node != nullptr) {
-    if (node->value == element) {
+    if (node->key == element) {
       return true;
     }
-    if (node->value < element) {
+    if (node->key < element) {
       if (node->right_son == nullptr) {
         return false;
       }
@@ -100,7 +100,7 @@ Node* Insert(Node* head, int new_element) {
   std::pair<Node*, Node*> result = Split(head, new_element);
   Node* node = new Node;
   node->size = 1;
-  node->value = new_element;
+  node->key = new_element;
   all_nodes.push_back(node);
   return Merge(result.first, Merge(node, result.second));
 }
@@ -113,75 +113,66 @@ Node* Erase(Node* head, int element) {
   return Merge(Split(result.first, element - 1).first, result.second);
 }
 
-void Next(Node* head, int value) {
+std::optional<int> Next(Node* head, int value) {
   Node* node = head;
-  int normal_value = kMin;
+  std::optional<int> normal_value = std::nullopt;
   while (node != nullptr) {
-    if (node->value <= value) {
+    if (node->key <= value) {
       if (node->right_son == nullptr) {
-        if (normal_value != kMin) {
-          std::cout << normal_value << "\n";
-          return;
+        if (normal_value) {
+          return normal_value;
         }
-        std::cout << "none\n";
-        return;
+        return {};
       }
       node = node->right_son;
       continue;
     }
     if (node->left_son == nullptr) {
-      std::cout << node->value << "\n";
-      return;
+      return node->key;
     }
-    if (normal_value == kMin) {
-      normal_value = node->value;
+    if (!normal_value) {
+      normal_value = node->key;
     }
-    normal_value = std::min(node->value, normal_value);
+    normal_value.value() = std::min(node->key, normal_value.value());
     node = node->left_son;
   }
-  std::cout << "none\n";
+  return {};
 }
 
-void Prev(Node* head, int value) {
+std::optional<int> Prev(Node* head, int value) {
   Node* node = head;
-  int normal_value = kMin;
+  std::optional<int> normal_value = std::nullopt;
   while (node != nullptr) {
-    if (node->value >= value) {
+    if (node->key >= value) {
       if (node->left_son == nullptr) {
-        if (normal_value != kMin) {
-          std::cout << normal_value << "\n";
-          return;
+        if (normal_value) {
+          return normal_value;
         }
-        std::cout << "none\n";
-        return;
+        return {};
       }
       node = node->left_son;
       continue;
     }
     if (node->right_son == nullptr) {
-      std::cout << node->value << "\n";
-      return;
+      return node->key;
     }
-    normal_value = std::max(node->value, normal_value);
+    normal_value.value() = std::max(node->key, normal_value.value());
     node = node->right_son;
   }
-  std::cout << "none\n";
+  return {};
 }
 
-void Kth(Node* head, int number) {
+std::optional<int> Kth(Node* head, int number) {
   Node* node = head;
   int add = 0;
   if (head == nullptr) {
-    std::cout << "none\n";
-    return;
+    return {};
   }
   if (head->size <= number) {
-    std::cout << "none\n";
-    return;
+    return {};
   }
   if (number < 0) {
-    std::cout << "none\n";
-    return;
+    return {};
   }
   while (node != nullptr) {
     if (node->left_son != nullptr and add + node->left_son->size > number) {
@@ -189,12 +180,10 @@ void Kth(Node* head, int number) {
       continue;
     }
     if (node->left_son == nullptr and number == add) {
-      std::cout << node->value << "\n";
-      return;
+      return node->key;
     }
     if (node->left_son != nullptr and number == add + node->left_son->size) {
-      std::cout << node->value << "\n";
-      return;
+      return node->key;
     }
     if (node->left_son == nullptr) {
       add += 1;
@@ -203,9 +192,51 @@ void Kth(Node* head, int number) {
     }
     node = node->right_son;
   }
+  return {};
+}
+Node* QueryProcess(std::string query, Node* head, int number) {
+  if (query == "insert") {
+    head = Insert(head, number);
+  }
+  if (query == "delete") {
+    head = Erase(head, number);
+  }
+  if (query == "exists") {
+    if (Exist(head, number)) {
+      std::cout << "true\n";
+    } else {
+      std::cout << "false\n";
+    }
+  }
+  if (query == "next") {
+    std::optional<int> next = Next(head, number);
+    if (next) {
+      std::cout << next.value() << "\n";
+    } else {
+      std::cout << "none\n";
+    }
+  }
+  if (query == "prev") {
+    std::optional<int> prev = Prev(head, number);
+    if (prev) {
+      std::cout << prev.value() << "\n";
+    } else {
+      std::cout << "none\n";
+    }
+  }
+  if (query == "kth") {
+    std::optional<int> kth = Kth(head, number);
+    if (kth) {
+      std::cout << kth.value() << "\n";
+    } else {
+      std::cout << "none\n";
+    }
+    Kth(head, number);
+  }
+  return head;
 }
 
-void Speed() {
+void BoostIO() {
   std::ios::sync_with_stdio(false);
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(0);
@@ -213,45 +244,13 @@ void Speed() {
 }
 
 int main() {
-  Speed();
+  BoostIO();
   std::string query;
   int number = 0;
   Node* head = nullptr;
   while (std::cin >> query) {
-    if (query == ".") {
-      break;
-    }
     std::cin >> number;
-    if (query == "insert") {
-      if (head == nullptr) {
-        head = new Node;
-        head->size = 1;
-        head->value = number;
-        all_nodes.push_back(head);
-        continue;
-      }
-      head = Insert(head, number);
-    }
-    if (query == "delete") {
-      head = Erase(head, number);
-      continue;
-    }
-    if (query == "exists") {
-      if (Exist(head, number)) {
-        std::cout << "true\n";
-      } else {
-        std::cout << "false\n";
-      }
-    }
-    if (query == "next") {
-      Next(head, number);
-    }
-    if (query == "prev") {
-      Prev(head, number);
-    }
-    if (query == "kth") {
-      Kth(head, number);
-    }
+    head = QueryProcess(query, head, number);
   }
   for (size_t i = 0; i < all_nodes.size(); ++i) {
     delete all_nodes[i];

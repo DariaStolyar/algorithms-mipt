@@ -5,71 +5,12 @@
 
 class Tree {
  public:
-  Tree(const std::vector<int>& tree_length) : tree_length_(tree_length) {
-    tree_.resize(4 * tree_length.size());
-  }
+  Tree(const std::vector<int>& tree_length);
 
-  void NewTree(size_t node, size_t start, size_t finish) {
-    if (start == finish) {
-      tree_[node] = {tree_length_[start], 0, 0};
-      return;
-    }
-    size_t middle = (start + finish) / 2;
-    NewTree(node * 2, start, middle);
-    NewTree(node * 2 + 1, middle + 1, finish);
-    tree_[node] = {tree_[node * 2][0] + tree_[node * 2 + 1][0], 0, 0};
-  }
+  void NewTree(size_t node, size_t start, size_t finish);
 
   void Update(size_t node, std::pair<size_t, size_t> start_finish, size_t left,
-              size_t right, int change) {
-    size_t start = start_finish.first;
-    size_t finish = start_finish.second;
-
-    if (start == left && finish == right) {
-      if (start == finish) {
-        tree_[node] = {tree_[node][0], tree_[node][1] + change, 0};
-        return;
-      }
-      tree_[node][1] += change;
-      tree_[node][2] += change;
-      return;
-    }
-
-    size_t middle = (start + finish) / 2;
-    std::pair<size_t, size_t> new_start_finish;
-    size_t first_son = 2 * node;
-    size_t second_son = 2 * node + 1;
-    tree_[first_son][1] += tree_[node][2];
-    tree_[first_son][2] += tree_[node][2];
-    tree_[second_son][1] += tree_[node][2];
-    tree_[second_son][2] += tree_[node][2];
-    tree_[node][2] = 0;
-
-    if (left <= middle) {
-      new_start_finish.first = start;
-      new_start_finish.second = middle;
-      Update(first_son, new_start_finish, left, std::min(right, middle),
-             change);
-    }
-
-    if (right > middle) {
-      new_start_finish.first = middle + 1;
-      new_start_finish.second = finish;
-      Update(second_son, new_start_finish, std::max(left, middle + 1), right,
-             change);
-    }
-
-    if (tree_[first_son][1] < tree_[second_son][1]) {
-      tree_[node][0] = tree_[first_son][0];
-      tree_[node][1] = tree_[first_son][1];
-    } else if (tree_[first_son][1] > tree_[2 * node + 1][1]) {
-      tree_[node][0] = tree_[second_son][0];
-      tree_[node][1] = tree_[second_son][1];
-    } else {
-      tree_[node][0] = tree_[first_son][0] + tree_[second_son][0];
-      tree_[node][1] = tree_[second_son][1];
-    }
-  }
+              size_t right, int change);
 
   int GetRootValue() { return tree_[1][0]; }
 
@@ -77,6 +18,71 @@ class Tree {
   std::vector<std::vector<int>> tree_;
   std::vector<int> tree_length_;
 };
+
+Tree::Tree(const std::vector<int>& tree_length) : tree_length_(tree_length) {
+  tree_.resize(4 * tree_length.size());
+}
+
+void Tree::NewTree(size_t node, size_t start, size_t finish) {
+  if (start == finish) {
+    tree_[node] = {tree_length_[start], 0, 0};
+    return;
+  }
+  size_t middle = (start + finish) / 2;
+  NewTree(node * 2, start, middle);
+  NewTree(node * 2 + 1, middle + 1, finish);
+  tree_[node] = {tree_[node * 2][0] + tree_[node * 2 + 1][0], 0, 0};
+}
+
+void Tree::Update(size_t node, std::pair<size_t, size_t> start_finish,
+                  size_t left, size_t right, int change) {
+  size_t start = start_finish.first;
+  size_t finish = start_finish.second;
+
+  if (start == left && finish == right) {
+    if (start == finish) {
+      tree_[node] = {tree_[node][0], tree_[node][1] + change, 0};
+      return;
+    }
+    tree_[node][1] += change;
+    tree_[node][2] += change;
+    return;
+  }
+
+  size_t middle = (start + finish) / 2;
+  std::pair<size_t, size_t> new_start_finish;
+  size_t first_son = 2 * node;
+  size_t second_son = 2 * node + 1;
+  tree_[first_son][1] += tree_[node][2];
+  tree_[first_son][2] += tree_[node][2];
+  tree_[second_son][1] += tree_[node][2];
+  tree_[second_son][2] += tree_[node][2];
+  tree_[node][2] = 0;
+
+  if (left <= middle) {
+    new_start_finish.first = start;
+    new_start_finish.second = middle;
+    Update(first_son, new_start_finish, left, std::min(right, middle), change);
+  }
+
+  if (right > middle) {
+    new_start_finish.first = middle + 1;
+    new_start_finish.second = finish;
+    Update(second_son, new_start_finish, std::max(left, middle + 1), right,
+           change);
+  }
+
+  if (tree_[first_son][1] < tree_[second_son][1]) {
+    tree_[node][0] = tree_[first_son][0];
+    tree_[node][1] = tree_[first_son][1];
+  } else if (tree_[first_son][1] > tree_[2 * node + 1][1]) {
+    tree_[node][0] = tree_[second_son][0];
+    tree_[node][1] = tree_[second_son][1];
+  } else {
+    tree_[node][0] = tree_[first_son][0] + tree_[second_son][0];
+    tree_[node][1] = tree_[second_son][1];
+  }
+}
 
 void BoostIO() {
   std::ios::sync_with_stdio(false);

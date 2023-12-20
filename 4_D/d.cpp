@@ -11,7 +11,7 @@
 struct Node {
   int key = 0;
   int priority = rand();
-  int size = 0;
+  size_t size = 0;
   Node* left_son = nullptr;
   Node* right_son = nullptr;
 };
@@ -19,23 +19,14 @@ struct Node {
 std::vector<Node*> all_nodes;
 
 void ChangeSize(Node* head) {
-  if (head->left_son == nullptr and head->right_son == nullptr) {
-    head->size = 1;
-  } else if (head->left_son == nullptr) {
-    head->size = 1 + head->right_son->size;
-  } else if (head->right_son == nullptr) {
-    head->size = 1 + head->left_son->size;
-  } else {
-    head->size = 1 + head->right_son->size + head->left_son->size;
-  }
+  size_t size_left = (head->left_son != nullptr ? head->left_son->size : 0);
+  size_t size_right = (head->right_son != nullptr ? head->right_son->size : 0);
+  head->size = 1 + size_left + size_right;
 }
 
 Node* Merge(Node* left, Node* right) {
-  if (left == nullptr) {
-    return right;
-  }
-  if (right == nullptr) {
-    return left;
+  if (left == nullptr or right == nullptr) {
+    return (left == nullptr ? right : left);
   }
   if (left->priority < right->priority) {
     left->right_son = Merge(left->right_son, right);
@@ -118,12 +109,6 @@ std::optional<int> Next(Node* head, int value) {
   std::optional<int> normal_value = std::nullopt;
   while (node != nullptr) {
     if (node->key <= value) {
-      if (node->right_son == nullptr) {
-        if (normal_value) {
-          return normal_value;
-        }
-        return {};
-      }
       node = node->right_son;
       continue;
     }
@@ -136,6 +121,9 @@ std::optional<int> Next(Node* head, int value) {
     normal_value.value() = std::min(node->key, normal_value.value());
     node = node->left_son;
   }
+  if (normal_value) {
+    return normal_value;
+  }
   return {};
 }
 
@@ -144,12 +132,6 @@ std::optional<int> Prev(Node* head, int value) {
   std::optional<int> normal_value = std::nullopt;
   while (node != nullptr) {
     if (node->key >= value) {
-      if (node->left_son == nullptr) {
-        if (normal_value) {
-          return normal_value;
-        }
-        return {};
-      }
       node = node->left_son;
       continue;
     }
@@ -159,37 +141,25 @@ std::optional<int> Prev(Node* head, int value) {
     normal_value.value() = std::max(node->key, normal_value.value());
     node = node->right_son;
   }
+  if (normal_value) {
+    return normal_value;
+  }
   return {};
 }
 
-std::optional<int> Kth(Node* head, int number) {
+std::optional<int> Kth(Node* head, size_t number) {
   Node* node = head;
   int add = 0;
-  if (head == nullptr) {
-    return {};
-  }
-  if (head->size <= number) {
-    return {};
-  }
-  if (number < 0) {
-    return {};
-  }
   while (node != nullptr) {
     if (node->left_son != nullptr and add + node->left_son->size > number) {
       node = node->left_son;
       continue;
     }
-    if (node->left_son == nullptr and number == add) {
+    if (number ==
+        add + (node->left_son == nullptr ? 0 : node->left_son->size)) {
       return node->key;
     }
-    if (node->left_son != nullptr and number == add + node->left_son->size) {
-      return node->key;
-    }
-    if (node->left_son == nullptr) {
-      add += 1;
-    } else {
-      add += node->left_son->size + 1;
-    }
+    add += (node->left_son == nullptr ? 0 : node->left_son->size) + 1;
     node = node->right_son;
   }
   return {};

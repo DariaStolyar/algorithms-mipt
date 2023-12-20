@@ -7,17 +7,15 @@
 #include <string>
 #include <vector>
 
-struct Node {
+struct CartesianTree {
   std::string key;
   int priority = rand();
   std::string value;
-  Node* left_son = nullptr;
-  Node* right_son = nullptr;
+  CartesianTree* left_son = nullptr;
+  CartesianTree* right_son = nullptr;
 };
 
-std::vector<Node*> all_nodes;
-
-Node* Merge(Node* left, Node* right) {
+CartesianTree* Merge(CartesianTree* left, CartesianTree* right) {
   if (left == nullptr) {
     return right;
   }
@@ -32,7 +30,8 @@ Node* Merge(Node* left, Node* right) {
   return right;
 }
 
-std::pair<Node*, Node*> Split(Node* head, std::string value) {
+std::pair<CartesianTree*, CartesianTree*> Split(CartesianTree* head,
+                                                std::string value) {
   if (head == nullptr) {
     return {nullptr, nullptr};
   }
@@ -40,20 +39,22 @@ std::pair<Node*, Node*> Split(Node* head, std::string value) {
     if (head->right_son == nullptr) {
       return {head, nullptr};
     }
-    std::pair<Node*, Node*> result = Split(head->right_son, value);
+    std::pair<CartesianTree*, CartesianTree*> result =
+        Split(head->right_son, value);
     head->right_son = result.first;
     return {head, result.second};
   }
   if (head->left_son == nullptr) {
     return {nullptr, head};
   }
-  std::pair<Node*, Node*> result = Split(head->left_son, value);
+  std::pair<CartesianTree*, CartesianTree*> result =
+      Split(head->left_son, value);
   head->left_son = result.second;
   return {result.first, head};
 }
 
-Node* Exist(Node* head, std::string element) {
-  Node* node = head;
+CartesianTree* Exist(CartesianTree* head, std::string element) {
+  CartesianTree* node = head;
   if (head == nullptr) {
     return nullptr;
   }
@@ -76,16 +77,25 @@ Node* Exist(Node* head, std::string element) {
   return nullptr;
 }
 
-Node* Insert(Node* head, std::string new_element, std::string value) {
+CartesianTree* Insert(CartesianTree* head, std::string new_element,
+                      std::string value) {
   if (Exist(head, new_element) != nullptr) {
     return head;
   }
-  std::pair<Node*, Node*> result = Split(head, new_element);
-  Node* node = new Node;
+  std::pair<CartesianTree*, CartesianTree*> result = Split(head, new_element);
+  CartesianTree* node = new CartesianTree;
   node->key = new_element;
   node->value = value;
-  all_nodes.push_back(node);
   return Merge(result.first, Merge(node, result.second));
+}
+
+void Delete(CartesianTree* node) {
+  if (node == nullptr) {
+    return;
+  }
+  Delete(node->right_son);
+  Delete(node->left_son);
+  delete node;
 }
 
 void BoostIO() {
@@ -99,8 +109,8 @@ int main() {
   BoostIO();
   size_t count;
   std::cin >> count;
-  Node* head1 = nullptr;
-  Node* head2 = nullptr;
+  CartesianTree* head1 = nullptr;
+  CartesianTree* head2 = nullptr;
   for (size_t i = 0; i < count; ++i) {
     std::string rider;
     std::string car;
@@ -119,7 +129,6 @@ int main() {
       std::cout << Exist(head2, query)->value << "\n";
     }
   }
-  for (size_t i = 0; i < all_nodes.size(); ++i) {
-    delete all_nodes[i];
-  }
+  Delete(head1);
+  Delete(head2);
 }

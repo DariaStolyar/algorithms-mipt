@@ -6,9 +6,7 @@
 // последнего столбца
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
-#include <string>
 #include <vector>
 
 void BoostIO() {
@@ -66,26 +64,10 @@ void CreateMatchMask(std::vector<std::vector<int>>& match_mask, int size1) {
   }
 }
 
-int main() {
-  BoostIO();
+void FindCountOfColoring(int size1, int size2,
+                         std::vector<std::vector<int>> sample) {
   const long long kCountMax = 1e9 + 7;
-  int size1;
-  int size2;
-  std::cin >> size1 >> size2;
-  std::vector<std::vector<int>> sample(size1, std::vector<int>(size2));
-  char simbol;
-  for (int i = 0; i < size1; ++i) {
-    for (int j = 0; j < size2; ++j) {
-      std::cin >> simbol;
-      if (simbol == '.') {
-        sample[i][j] = 0;
-      } else if (simbol == '+') {
-        sample[i][j] = 1;
-      } else {
-        sample[i][j] = -1;
-      }
-    }
-  }
+
   std::vector<std::vector<int>> check_sample(size2,
                                              std::vector<int>(1 << size1));
   CreateCheckSample(check_sample, sample, size1, size2);
@@ -116,4 +98,26 @@ int main() {
     }
   }
   std::cout << ans;
+}
+
+int main() {
+  BoostIO();
+  int size1;
+  int size2;
+  std::cin >> size1 >> size2;
+  std::vector<std::vector<int>> sample(size1, std::vector<int>(size2));
+  char symbol;
+  for (int i = 0; i < size1; ++i) {
+    for (int j = 0; j < size2; ++j) {
+      std::cin >> symbol;
+      if (symbol == '.') {
+        sample[i][j] = 0;
+      } else if (symbol == '+') {
+        sample[i][j] = 1;
+      } else {
+        sample[i][j] = -1;
+      }
+    }
+  }
+  FindCountOfColoring(size1, size2, sample);
 }

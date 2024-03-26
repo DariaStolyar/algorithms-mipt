@@ -5,9 +5,7 @@
 // i экспериментaх и j самолетиках
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
-#include <string>
 #include <vector>
 
 void BoostIO() {
@@ -17,17 +15,12 @@ void BoostIO() {
   std::cout.tie(nullptr);
 }
 
-int main() {
-  BoostIO();
-
-  int height;
-  int count;
-  std::cin >> height >> count;
+void FindMaxFloor(int height, int count) {
   std::vector<int> dp_string_i(count + 1);
   std::vector<int> dp_new_string(count + 1);
   if (1 >= height) {
     std::cout << 0;
-    return 0;
+    return;
   }
   for (int j = 0; j < count + 1; ++j) {
     if (j == 0) {
@@ -38,7 +31,7 @@ int main() {
   }
   if (dp_string_i[count] >= height) {
     std::cout << 1;
-    return 0;
+    return;
   }
   for (int i = 2; i <= height; ++i) {
     dp_new_string[0] = 1;
@@ -50,9 +43,19 @@ int main() {
     }
     if (dp_new_string[count] >= height) {
       std::cout << i;
-      return 0;
+      return;
     }
     std::copy(dp_new_string.begin(), dp_new_string.end(), dp_string_i.begin());
   }
   std::cout << -1;
+}
+
+int main() {
+  BoostIO();
+
+  int height;
+  int count;
+  std::cin >> height >> count;
+
+  FindMaxFloor(height, count);
 }

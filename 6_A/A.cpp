@@ -1,5 +1,5 @@
 // В задаче необходимо найти максимальную невозрастающую
-//подпоследовательность
+// подпоследовательность
 
 // dp[i] - на какой наибольший элемент может заканчиваться
 // последовательность длины i
@@ -10,23 +10,7 @@
 #include <string>
 #include <vector>
 
-void BoostIO() {
-  std::ios::sync_with_stdio(false);
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-}
-
-int main() {
-  BoostIO();
-
-  int force;
-  std::cin >> force;
-  std::vector<int> vector(force);
-  for (int i = 0; i < force; ++i) {
-    std::cin >> vector[i];
-  }
-
+void FindMaxDecreaseSubsequence(int force, std::vector<int> vector) {
   std::vector<int> dp(force + 1, INT_MIN);
   std::vector<int> indices(force + 1);
   std::vector<int> parent(force + 1, -1);
@@ -65,4 +49,24 @@ int main() {
   for (int i = answer.size() - 1; i > -1; --i) {
     std::cout << answer[i] + 1 << " ";
   }
+}
+
+void BoostIO() {
+  std::ios::sync_with_stdio(false);
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+}
+
+int main() {
+  BoostIO();
+
+  int force;
+  std::cin >> force;
+  std::vector<int> vector(force);
+  for (int i = 0; i < force; ++i) {
+    std::cin >> vector[i];
+  }
+
+  FindMaxDecreaseSubsequence(force, vector);
 }

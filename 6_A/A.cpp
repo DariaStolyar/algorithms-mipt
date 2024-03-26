@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-void FindMaxDecreaseSubsequence(int force, std::vector<int> vector) {
+void FindMaxDecreaseSubsequence(int force, std::vector<int>& vector) {
   std::vector<int> dp(force + 1, INT_MIN);
   std::vector<int> indices(force + 1);
   std::vector<int> parent(force + 1, -1);

@@ -4,33 +4,11 @@
 // задания с номерами <= i и потратить ресурса <= j
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
-#include <string>
 #include <vector>
 
-void BoostIO() {
-  std::ios::sync_with_stdio(false);
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-}
-
-int main() {
-  BoostIO();
-
-  int count;
-  int volume;
-  std::cin >> count >> volume;
-  std::vector<int> resources(count);
-  std::vector<int> money(count);
-  for (int i = 0; i < count; ++i) {
-    std::cin >> resources[i];
-  }
-  for (int i = 0; i < count; ++i) {
-    std::cin >> money[i];
-  }
-
+void FindMaxAmount(int count, int volume, std::vector<int>& resources,
+                   std::vector<int>& money) {
   std::vector<std::vector<int>> dp(count + 1, std::vector<int>(volume + 1));
 
   for (int i = 1; i < count + 1; ++i) {
@@ -55,4 +33,28 @@ int main() {
     vol_i -= resources[res_i - 1];
     res_i -= 1;
   }
+}
+
+void BoostIO() {
+  std::ios::sync_with_stdio(false);
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+}
+
+int main() {
+  BoostIO();
+
+  int count;
+  int volume;
+  std::cin >> count >> volume;
+  std::vector<int> resources(count);
+  std::vector<int> money(count);
+  for (int i = 0; i < count; ++i) {
+    std::cin >> resources[i];
+  }
+  for (int i = 0; i < count; ++i) {
+    std::cin >> money[i];
+  }
+  FindMaxAmount(count, volume, resources, money);
 }

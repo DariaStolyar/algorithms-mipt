@@ -2,9 +2,7 @@
 // ориентированного графа
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
-#include <string>
 #include <vector>
 
 std::vector<int> color;
@@ -19,7 +17,7 @@ class Graph {
   std::vector<std::vector<int>> reversed_;
 
  public:
-  explicit Graph(std::vector<std::vector<int>> vector, int count_nodes) {
+  explicit Graph(std::vector<std::vector<int>> vector, size_t count_nodes) {
     sides_.resize(count_nodes);
     reversed_.resize(count_nodes);
     for (size_t i = 0; i < vector.size(); ++i) {
@@ -64,38 +62,43 @@ void BoostIO() {
   std::cout.tie(nullptr);
 }
 
-int main() {
-  BoostIO();
-
-  int count_sides;
-  int count_nodes;
-  std::cin >> count_nodes >> count_sides;
-  std::vector<std::vector<int>> sides(count_sides, std::vector<int>(2));
-  for (int i = 0; i < count_sides; ++i) {
-    std::cin >> sides[i][0] >> sides[i][1];
-  }
-  Graph graph(sides, count_nodes);
+void FindStrongConnection(size_t count_nodes, Graph& graph) {
   color.resize(count_nodes);
   tout.resize(count_nodes);
   strong_connectivity.resize(count_nodes);
-  for (int i = 0; i < count_nodes; ++i) {
+  for (size_t i = 0; i < count_nodes; ++i) {
     if (color[i] == 0) {
       DFS(i, graph);
     }
   }
+
   std::sort(tout.begin(), tout.end());
   std::reverse(tout.begin(), tout.end());
   std::fill(color.begin(), color.end(), 0);
 
-  for (int i = 0; i < count_nodes; ++i) {
+  for (size_t i = 0; i < count_nodes; ++i) {
     int node = tout[i].second;
     if (color[node] == 0) {
       DFSr(node, graph);
       ++index;
     }
   }
+};
+
+int main() {
+  BoostIO();
+
+  size_t count_sides;
+  size_t count_nodes;
+  std::cin >> count_nodes >> count_sides;
+  std::vector<std::vector<int>> sides(count_sides, std::vector<int>(2));
+  for (size_t i = 0; i < count_sides; ++i) {
+    std::cin >> sides[i][0] >> sides[i][1];
+  }
+  Graph graph(sides, count_nodes);
+  FindStrongConnection(count_nodes, graph);
   std::cout << index << "\n";
-  for (int i = 0; i < count_nodes; ++i) {
+  for (size_t i = 0; i < count_nodes; ++i) {
     std::cout << strong_connectivity[i] + 1 << " ";
   }
 }

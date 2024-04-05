@@ -16,7 +16,7 @@ class Graph {
   std::vector<std::vector<int>> sides_;
 
  public:
-  explicit Graph(std::vector<std::vector<int>> vector, int count_nodes) {
+  explicit Graph(std::vector<std::vector<int>> vector, size_t count_nodes) {
     sides_.resize(count_nodes);
     for (size_t i = 0; i < vector.size(); ++i) {
       sides_[vector[i][0] - 1].push_back(vector[i][1] - 1);
@@ -56,16 +56,11 @@ void BoostIO() {
   std::cout.tie(nullptr);
 }
 
-int main() {
-  BoostIO();
-
-  int count_sides;
-  int count_nodes;
-  std::cin >> count_nodes >> count_sides;
+std::vector<int> FindBridges(size_t count_sides, size_t count_nodes,
+                             std::vector<std::vector<int>>& sides,
+                             Graph& graph) {
   std::map<std::pair<int, int>, std::pair<bool, int>> sides_map;
-  std::vector<std::vector<int>> sides(count_sides, std::vector<int>(2));
-  for (int i = 0; i < count_sides; ++i) {
-    std::cin >> sides[i][0] >> sides[i][1];
+  for (size_t i = 0; i < count_sides; ++i) {
     std::pair<int, int> side = {sides[i][0], sides[i][1]};
     std::pair<int, int> side_r = {sides[i][1], sides[i][0]};
     if (sides_map.find(side) == sides_map.end()) {
@@ -76,11 +71,10 @@ int main() {
       sides_map[side_r] = {true, i};
     }
   }
-  Graph graph(sides, count_nodes);
   color.resize(count_nodes);
   tin.resize(count_nodes);
   return_node.resize(count_nodes);
-  for (int i = 0; i < count_nodes; ++i) {
+  for (size_t i = 0; i < count_nodes; ++i) {
     if (color[i] == 0) {
       DFS(i, graph, -1);
     }
@@ -96,8 +90,23 @@ int main() {
     ans.push_back(sides_map[bridges[i]].second);
   }
   std::sort(ans.begin(), ans.end());
+  return ans;
+}
+
+int main() {
+  BoostIO();
+
+  size_t count_sides;
+  size_t count_nodes;
+  std::cin >> count_nodes >> count_sides;
+  std::vector<std::vector<int>> sides(count_sides, std::vector<int>(2));
+  for (size_t i = 0; i < count_sides; ++i) {
+    std::cin >> sides[i][0] >> sides[i][1];
+  }
+  Graph graph(sides, count_nodes);
+  std::vector<int> ans = FindBridges(count_sides, count_nodes, sides, graph);
   std::cout << ans.size() << "\n";
-  for (size_t i = 0; i < ans.size(); ++i) {
-    std::cout << ans[i] + 1 << " ";
+  for (int ans_i : ans) {
+    std::cout << ans_i + 1 << " ";
   }
 }

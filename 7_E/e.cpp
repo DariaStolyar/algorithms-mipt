@@ -5,18 +5,23 @@
 #include <map>
 #include <vector>
 
-std::vector<int> color;
-std::vector<int> tin;
-std::vector<int> return_node;
-std::vector<std::pair<int, int>> bridges;
-int timer = 0;
+struct ObjectsForFindBridges {
+  std::vector<int> color;
+  std::vector<int> tin;
+  std::vector<int> return_node;
+  std::vector<std::pair<int, int>> bridges;
+  int timer = 0;
+  explicit ObjectsForFindBridges(size_t count_nodes)
+      : color(count_nodes), tin(count_nodes), return_node(count_nodes) {}
+};
 
 class Graph {
  private:
   std::vector<std::vector<int>> sides_;
 
  public:
-  explicit Graph(std::vector<std::vector<int>> vector, size_t count_nodes) {
+  explicit Graph(const std::vector<std::vector<int>>& vector,
+                 size_t count_nodes) {
     sides_.resize(count_nodes);
     for (size_t i = 0; i < vector.size(); ++i) {
       sides_[vector[i][0] - 1].push_back(vector[i][1] - 1);
@@ -24,27 +29,30 @@ class Graph {
     }
   }
 
-  std::vector<int> GetSides(int node) { return sides_[node]; }
+  std::vector<int> GetSides(int node) const { return sides_[node]; }
 };
 
-void DFS(int from, Graph& graph, int parent_from) {
-  tin[from] = timer++;
-  return_node[from] = tin[from];
-  color[from] = 1;
+void DFS(int from, const Graph& graph, int parent_from,
+         ObjectsForFindBridges& finding) {
+  finding.tin[from] = finding.timer++;
+  finding.return_node[from] = finding.tin[from];
+  finding.color[from] = 1;
   std::vector<int> sides_from = graph.GetSides(from);
   for (size_t i = 0; i < sides_from.size(); ++i) {
     int to_node = sides_from[i];
     if (to_node == parent_from) {
       continue;
     }
-    if (color[to_node] == 0) {
-      DFS(to_node, graph, from);
-      return_node[from] = std::min(return_node[from], return_node[to_node]);
-      if (return_node[to_node] == tin[to_node]) {
-        bridges.push_back({from + 1, to_node + 1});
+    if (finding.color[to_node] == 0) {
+      DFS(to_node, graph, from, finding);
+      finding.return_node[from] =
+          std::min(finding.return_node[from], finding.return_node[to_node]);
+      if (finding.return_node[to_node] == finding.tin[to_node]) {
+        finding.bridges.push_back({from + 1, to_node + 1});
       }
     } else {
-      return_node[from] = std::min(return_node[from], tin[to_node]);
+      finding.return_node[from] =
+          std::min(finding.return_node[from], finding.tin[to_node]);
     }
   }
 }
@@ -57,8 +65,8 @@ void BoostIO() {
 }
 
 std::vector<int> FindBridges(size_t count_sides, size_t count_nodes,
-                             std::vector<std::vector<int>>& sides,
-                             Graph& graph) {
+                             const std::vector<std::vector<int>>& sides,
+                             const Graph& graph) {
   std::map<std::pair<int, int>, std::pair<bool, int>> sides_map;
   for (size_t i = 0; i < count_sides; ++i) {
     std::pair<int, int> side = {sides[i][0], sides[i][1]};
@@ -71,23 +79,21 @@ std::vector<int> FindBridges(size_t count_sides, size_t count_nodes,
       sides_map[side_r] = {true, i};
     }
   }
-  color.resize(count_nodes);
-  tin.resize(count_nodes);
-  return_node.resize(count_nodes);
+  ObjectsForFindBridges finding(count_nodes);
   for (size_t i = 0; i < count_nodes; ++i) {
-    if (color[i] == 0) {
-      DFS(i, graph, -1);
+    if (finding.color[i] == 0) {
+      DFS(i, graph, -1, finding);
     }
   }
   std::vector<int> ans;
-  for (size_t i = 0; i < bridges.size(); ++i) {
-    if (sides_map.find(bridges[i]) == sides_map.end()) {
+  for (size_t i = 0; i < finding.bridges.size(); ++i) {
+    if (sides_map.find(finding.bridges[i]) == sides_map.end()) {
       continue;
     }
-    if (sides_map[bridges[i]].first) {
+    if (sides_map[finding.bridges[i]].first) {
       continue;
     }
-    ans.push_back(sides_map[bridges[i]].second);
+    ans.push_back(sides_map[finding.bridges[i]].second);
   }
   std::sort(ans.begin(), ans.end());
   return ans;

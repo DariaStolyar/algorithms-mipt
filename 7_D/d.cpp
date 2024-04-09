@@ -5,11 +5,17 @@
 #include <iostream>
 #include <vector>
 
-std::vector<int> color;
-std::vector<std::pair<int, int>> tout;
-std::vector<int> strong_connectivity;
-int index = 0;
-int timer = 0;
+struct ObjectsForFindConnectivity {
+  std::vector<int> color;
+  std::vector<std::pair<int, int>> tout;
+  std::vector<int> strong_connectivity;
+  int index = 0;
+  int timer = 0;
+  explicit ObjectsForFindConnectivity(size_t count_nodes)
+      : color(count_nodes),
+        tout(count_nodes),
+        strong_connectivity(count_nodes) {}
+};
 
 class Graph {
  private:
@@ -17,42 +23,42 @@ class Graph {
   std::vector<std::vector<int>> reversed_;
 
  public:
-  explicit Graph(std::vector<std::vector<int>> vector, size_t count_nodes) {
-    sides_.resize(count_nodes);
-    reversed_.resize(count_nodes);
+  explicit Graph(const std::vector<std::vector<int>>& vector,
+                 size_t count_nodes)
+      : sides_(count_nodes), reversed_(count_nodes) {
     for (size_t i = 0; i < vector.size(); ++i) {
       sides_[vector[i][0] - 1].push_back(vector[i][1] - 1);
       reversed_[vector[i][1] - 1].push_back(vector[i][0] - 1);
     }
   }
 
-  std::vector<int> GetSides(int node) { return sides_[node]; }
+  std::vector<int> GetSides(int node) const { return sides_[node]; }
 
-  std::vector<int> GetReversedSides(int node) { return reversed_[node]; }
+  std::vector<int> GetReversedSides(int node) const { return reversed_[node]; }
 };
 
-void DFS(int from, Graph& graph) {
-  color[from] = 1;
+void DFS(int from, const Graph& graph, ObjectsForFindConnectivity& finding) {
+  finding.color[from] = 1;
   for (size_t i = 0; i < graph.GetSides(from).size(); ++i) {
     int to_node = graph.GetSides(from)[i];
-    if (color[to_node] == 0) {
-      DFS(to_node, graph);
+    if (finding.color[to_node] == 0) {
+      DFS(to_node, graph, finding);
     }
   }
-  color[from] = 2;
-  tout[from] = {timer++, from};
+  finding.color[from] = 2;
+  finding.tout[from] = {finding.timer++, from};
 }
 
-void DFSr(int from, Graph& graph) {
-  color[from] = 1;
+void DFSr(int from, const Graph& graph, ObjectsForFindConnectivity& finding) {
+  finding.color[from] = 1;
   for (size_t i = 0; i < graph.GetReversedSides(from).size(); ++i) {
     int to_node = graph.GetReversedSides(from)[i];
-    if (color[to_node] == 0) {
-      DFSr(to_node, graph);
+    if (finding.color[to_node] == 0) {
+      DFSr(to_node, graph, finding);
     }
   }
-  color[from] = 2;
-  strong_connectivity[from] = index;
+  finding.color[from] = 2;
+  finding.strong_connectivity[from] = finding.index;
 }
 
 void BoostIO() {
@@ -62,27 +68,26 @@ void BoostIO() {
   std::cout.tie(nullptr);
 }
 
-void FindStrongConnection(size_t count_nodes, Graph& graph) {
-  color.resize(count_nodes);
-  tout.resize(count_nodes);
-  strong_connectivity.resize(count_nodes);
+std::vector<int> FindStrongConnection(size_t count_nodes, const Graph& graph) {
+  ObjectsForFindConnectivity finding(count_nodes);
   for (size_t i = 0; i < count_nodes; ++i) {
-    if (color[i] == 0) {
-      DFS(i, graph);
+    if (finding.color[i] == 0) {
+      DFS(i, graph, finding);
     }
   }
 
-  std::sort(tout.begin(), tout.end());
-  std::reverse(tout.begin(), tout.end());
-  std::fill(color.begin(), color.end(), 0);
+  std::sort(finding.tout.begin(), finding.tout.end());
+  std::reverse(finding.tout.begin(), finding.tout.end());
+  std::fill(finding.color.begin(), finding.color.end(), 0);
 
   for (size_t i = 0; i < count_nodes; ++i) {
-    int node = tout[i].second;
-    if (color[node] == 0) {
-      DFSr(node, graph);
-      ++index;
+    int node = finding.tout[i].second;
+    if (finding.color[node] == 0) {
+      DFSr(node, graph, finding);
+      ++finding.index;
     }
   }
+  return finding.strong_connectivity;
 };
 
 int main() {
@@ -96,9 +101,11 @@ int main() {
     std::cin >> sides[i][0] >> sides[i][1];
   }
   Graph graph(sides, count_nodes);
-  FindStrongConnection(count_nodes, graph);
-  std::cout << index << "\n";
+  auto strong_connection = FindStrongConnection(count_nodes, graph);
+  auto maximum =
+      *std::max_element(strong_connection.begin(), strong_connection.end());
+  std::cout << maximum + 1 << "\n";
   for (size_t i = 0; i < count_nodes; ++i) {
-    std::cout << strong_connectivity[i] + 1 << " ";
+    std::cout << strong_connection[i] + 1 << " ";
   }
 }

@@ -7,6 +7,8 @@
 #include <vector>
 
 const int cSize = 9;
+const std::string cFindString = "123456780";
+const std::vector<int> cFindState = {1, 2, 3, 4, 5, 6, 7, 8, 0};
 
 void BoostIO() {
   std::ios::sync_with_stdio(false);
@@ -16,9 +18,9 @@ void BoostIO() {
 }
 
 struct Node {
-  std::vector<int> sost;
+  std::vector<int> state;
   int pos0;
-  std::string str;
+  std::string str_state;
 };
 
 class Graph {
@@ -26,121 +28,128 @@ class Graph {
   std::unordered_map<std::string, Node> sides;
   explicit Graph() = default;
 
-  std::string AddNode(std::vector<int> sost) {
-    std::string str;
-    int pos_nul;
+  std::string AddNode(std::vector<int> state) {
+    std::string str_state;
+    int pos0;
     for (int i = 0; i < cSize; ++i) {
-      str += static_cast<char>(sost[i] + '0');
-      if (sost[i] == 0) {
-        pos_nul = i;
+      str_state += static_cast<char>(state[i] + '0');
+      if (state[i] == 0) {
+        pos0 = i;
       }
     }
-    sides[str] = Node({sost, pos_nul, str});
-    return str;
+    sides[str_state] = Node({state, pos0, str_state});
+    return str_state;
   }
 };
 
-std::vector<Node> NextPositions(Node now_node) {
-  const int cGood = 6;
-  std::vector<Node> nexts;
-  if (now_node.pos0 > 2) {
-    std::vector<int> new_sost = now_node.sost;
-    std::swap(new_sost[now_node.pos0], new_sost[now_node.pos0 - 3]);
+std::vector<Node> NextPositions(Node node) {
+  const int cDown = 6;
+  std::vector<Node> next_states;
+
+  if (node.pos0 > 2) {
+    std::vector<int> new_state = node.state;
+    std::swap(new_state[node.pos0], new_state[node.pos0 - 3]);
     std::string str;
     for (int i = 0; i < cSize; ++i) {
-      str += static_cast<char>(new_sost[i] + '0');
+      str += static_cast<char>(new_state[i] + '0');
     }
-    nexts.push_back({new_sost, now_node.pos0 - 3, str});
+    next_states.push_back({new_state, node.pos0 - 3, str});
   }
-  if (now_node.pos0 < cGood) {
-    std::vector<int> new_sost = now_node.sost;
-    std::swap(new_sost[now_node.pos0], new_sost[now_node.pos0 + 3]);
+
+  if (node.pos0 < cDown) {
+    std::vector<int> new_state = node.state;
+    std::swap(new_state[node.pos0], new_state[node.pos0 + 3]);
     std::string str;
     for (int i = 0; i < cSize; ++i) {
-      str += static_cast<char>(new_sost[i] + '0');
+      str += static_cast<char>(new_state[i] + '0');
     }
-    nexts.push_back({new_sost, now_node.pos0 + 3, str});
+    next_states.push_back({new_state, node.pos0 + 3, str});
   }
-  if (now_node.pos0 % 3 != 0) {
-    std::vector<int> new_sost = now_node.sost;
-    std::swap(new_sost[now_node.pos0], new_sost[now_node.pos0 - 1]);
+
+  if (node.pos0 % 3 != 0) {
+    std::vector<int> new_state = node.state;
+    std::swap(new_state[node.pos0], new_state[node.pos0 - 1]);
     std::string str;
     for (int i = 0; i < cSize; ++i) {
-      str += static_cast<char>(new_sost[i] + '0');
+      str += static_cast<char>(new_state[i] + '0');
     }
-    nexts.push_back({new_sost, now_node.pos0 - 1, str});
+    next_states.push_back({new_state, node.pos0 - 1, str});
   }
-  if (now_node.pos0 % 3 != 2) {
-    std::vector<int> new_sost = now_node.sost;
-    std::swap(new_sost[now_node.pos0], new_sost[now_node.pos0 + 1]);
+
+  if (node.pos0 % 3 != 2) {
+    std::vector<int> new_state = node.state;
+    std::swap(new_state[node.pos0], new_state[node.pos0 + 1]);
     std::string str;
     for (int i = 0; i < cSize; ++i) {
-      str += static_cast<char>(new_sost[i] + '0');
+      str += static_cast<char>(new_state[i] + '0');
     }
-    nexts.push_back({new_sost, now_node.pos0 + 1, str});
+    next_states.push_back({new_state, node.pos0 + 1, str});
   }
-  return nexts;
+  return next_states;
 }
 
-bool HaveAnswer(std::vector<int> sost) {
-  int invers = 0;
+bool HaveAnswer(std::vector<int> state) {
+  int count_inversions = 0;
   for (int i = 0; i < cSize; ++i) {
     for (int j = i + 1; j < cSize; ++j) {
-      if (sost[i] != 0 and sost[j] != 0 and sost[i] > sost[j]) {
-        invers += 1;
+      if (state[i] != 0 and state[j] != 0 and state[i] > state[j]) {
+        count_inversions += 1;
       }
     }
   }
-  return invers % 2 == 0;
+  return count_inversions % 2 == 0;
 }
 
 using QueueType = std::priority_queue<std::pair<int, std::string>,
                                       std::vector<std::pair<int, std::string>>,
                                       std::greater<>>;
 
-int ManchetRast(std::vector<int> sost1) {
-  int rast = 0;
+int ManhattanDist(std::vector<int> state) {
+  int dist = 0;
   for (int i = 0; i < cSize; ++i) {
-    if (sost1[i] == 0) {
+    if (state[i] == 0) {
       continue;
     }
-    int str_v = (sost1[i] - 1) / 3;
-    int col_v = (sost1[i] - 1) % 3;
-    rast += abs(str_v - (i / 3)) + abs(col_v - (i % 3));
+    int str_v = (state[i] - 1) / 3;
+    int col_v = (state[i] - 1) % 3;
+    dist += abs(str_v - (i / 3)) + abs(col_v - (i % 3));
   }
-  return rast;
+  return dist;
 }
 
 void Expand(Node& node, Graph& graph, QueueType& min_heap,
             std::unordered_map<std::string, std::pair<int, int>>& dist,
             std::unordered_map<std::string, std::string>& parent) {
   for (const auto& pair : NextPositions(node)) {
-    graph.AddNode(pair.sost);
-    if (!dist.contains(pair.str) or
-        dist[pair.str].first > dist[node.str].first + 1) {
-      dist[pair.str].first = dist[node.str].first + 1;
-      dist[pair.str].second = dist[node.str].first + ManchetRast(node.sost);
-      parent[pair.str] = node.str;
-      min_heap.push({dist[pair.str].second, pair.str});
+    graph.AddNode(pair.state);
+
+    if (!dist.contains(pair.str_state) or
+        dist[pair.str_state].first > dist[node.str_state].first + 1) {
+      dist[pair.str_state].first = dist[node.str_state].first + 1;
+      dist[pair.str_state].second =
+          dist[node.str_state].first + ManhattanDist(node.state);
+      parent[pair.str_state] = node.str_state;
+      min_heap.push({dist[pair.str_state].second, pair.str_state});
     }
   }
 }
 
 void FindDistances(
-    std::vector<int>& sost1, Graph& graph,
+    std::vector<int>& state, Graph& graph,
     std::unordered_map<std::string, std::pair<int, int>>& distances,
     std::unordered_map<std::string, std::string>& parent) {
-  std::string first_node = graph.AddNode(sost1);
-  distances[first_node] = {0, ManchetRast(sost1)};
+  std::string first_node = graph.AddNode(state);
+  distances[first_node] = {0, ManhattanDist(state)};
   QueueType min_heap;
-  min_heap.push({ManchetRast(sost1), first_node});
+  min_heap.push({ManhattanDist(state), first_node});
   parent[first_node] = "0";
 
   while (!min_heap.empty()) {
     auto dist_node = min_heap.top();
-    if (dist_node.second == "123456780") {
+    if (dist_node.second == cFindString) {
       break;
     }
+
     min_heap.pop();
     if (dist_node.first > distances[dist_node.second].second) {
       continue;
@@ -151,11 +160,12 @@ void FindDistances(
 
 int main() {
   BoostIO();
-  std::vector<int> sost1(cSize);
+  std::vector<int> state(cSize);
   for (int i = 0; i < cSize; ++i) {
-    std::cin >> sost1[i];
+    std::cin >> state[i];
   }
-  if (!HaveAnswer(sost1)) {
+
+  if (!HaveAnswer(state)) {
     std::cout << "-1";
     return 0;
   }
@@ -163,31 +173,28 @@ int main() {
   std::unordered_map<std::string, std::pair<int, int>> distances;
   std::unordered_map<std::string, std::string> parent;
 
-  FindDistances(sost1, graph, distances, parent);
+  FindDistances(state, graph, distances, parent);
 
-  std::cout << distances["123456780"].first << '\n';
-  std::string answer;
-  std::vector<int> for_node;
-  for (int i = 0; i < cSize; ++i) {
-    for_node.push_back(i);
-  }
-  Node this_node = {for_node, cSize - 1, "123456780"};
-  while (parent[this_node.str] != "0") {
-    Node prev_node = graph.sides[parent[this_node.str]];
+  std::cout << distances[cFindString].first << '\n';
+  std::string shifts_for_win;
+
+  Node this_node = {cFindState, cSize - 1, cFindString};
+  while (parent[this_node.str_state] != "0") {
+    Node prev_node = graph.sides[parent[this_node.str_state]];
     if (prev_node.pos0 - this_node.pos0 == 3) {
-      answer += "U";
+      shifts_for_win += "U";
     }
     if (prev_node.pos0 - this_node.pos0 == -3) {
-      answer += "D";
+      shifts_for_win += "D";
     }
     if (prev_node.pos0 - this_node.pos0 == 1) {
-      answer += "L";
+      shifts_for_win += "L";
     }
     if (prev_node.pos0 - this_node.pos0 == -1) {
-      answer += "R";
+      shifts_for_win += "R";
     }
     this_node = prev_node;
   }
-  std::reverse(answer.begin(), answer.end());
-  std::cout << answer;
+  std::reverse(shifts_for_win.begin(), shifts_for_win.end());
+  std::cout << shifts_for_win;
 }

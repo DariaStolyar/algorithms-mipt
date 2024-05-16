@@ -13,22 +13,20 @@ using QueueType =
 const int cDist = 2009000999;
 
 class Graph {
- private:
-  std::vector<std::vector<std::pair<int, int>>> sides_;
-
  public:
-  explicit Graph(const std::vector<std::vector<int>>& vector,
-                 size_t count_nodes)
-      : sides_(count_nodes) {
-    for (size_t i = 0; i < vector.size(); ++i) {
-      sides_[vector[i][0]].push_back({vector[i][1], vector[i][2]});
-      sides_[vector[i][1]].push_back({vector[i][0], vector[i][2]});
-    }
+  explicit Graph(size_t count_nodes) : sides_(count_nodes) {}
+
+  void AddSide(int node1, int node2, int weight) {
+    sides_[node1].push_back({node2, weight});
+    sides_[node2].push_back({node1, weight});
   }
 
   std::vector<std::pair<int, int>> GetSides(int node) const {
     return sides_[node];
   }
+
+ private:
+  std::vector<std::vector<std::pair<int, int>>> sides_;
 };
 
 void BoostIO() {
@@ -74,11 +72,14 @@ int main() {
     size_t count_sides;
     size_t count_nodes;
     std::cin >> count_nodes >> count_sides;
-    std::vector<std::vector<int>> sides(count_sides, std::vector<int>(3));
+    Graph graph(count_nodes);
     for (size_t j = 0; j < count_sides; ++j) {
-      std::cin >> sides[j][0] >> sides[j][1] >> sides[j][2];
+      int node1;
+      int node2;
+      int weight;
+      std::cin >> node1 >> node2 >> weight;
+      graph.AddSide(node1, node2, weight);
     }
-    Graph graph(sides, count_nodes);
     size_t node;
     std::cin >> node;
     std::vector<int> dist = FindDistances(count_nodes, graph, node);

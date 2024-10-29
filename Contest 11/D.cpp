@@ -40,33 +40,27 @@ void SortPairs(std::vector<std::tuple<int, int, int>>& clas_pair) {
     clas[i] = {std::get<0>(clas_pair[i]), std::get<1>(clas_pair[i]),
                std::get<2>(clas_pair[i])};
   }
-  std::vector<int> cnt(clas_pair.size(), 0);
+  std::vector<int> cnt1(clas_pair.size(), 0);
+  std::vector<int> cnt2(clas_pair.size(), 0);
   for (size_t i = 0; i < clas_pair.size(); ++i) {
-    ++cnt[std::get<1>(clas[i])];
+    ++cnt1[std::get<1>(clas[i])];
+    ++cnt2[std::get<0>(clas[i])];
   }
-  for (size_t i = 1; i < cnt.size(); ++i) {
-    cnt[i] += cnt[i - 1];
+  for (size_t i = 1; i < cnt1.size(); ++i) {
+    cnt1[i] += cnt1[i - 1];
+    cnt2[i] += cnt2[i - 1];
   }
   for (int i = static_cast<int>(clas_pair.size()) - 1; i >= 0; --i) {
-    clas_pair[--cnt[std::get<1>(clas[i])]] = {
-            std::get<0>(clas[i]), std::get<1>(clas[i]), std::get<2>(clas[i])};
+    clas_pair[--cnt1[std::get<1>(clas[i])]] = {
+        std::get<0>(clas[i]), std::get<1>(clas[i]), std::get<2>(clas[i])};
   }
   for (size_t i = 0; i < clas_pair.size(); ++i) {
     clas[i] = {std::get<0>(clas_pair[i]), std::get<1>(clas_pair[i]),
                std::get<2>(clas_pair[i])};
   }
-  for (size_t i = 0; i < cnt.size(); ++i) {
-    cnt[i] = 0;
-  }
-  for (size_t i = 0; i < clas_pair.size(); ++i) {
-    ++cnt[std::get<0>(clas[i])];
-  }
-  for (size_t i = 1; i < cnt.size(); ++i) {
-    cnt[i] += cnt[i - 1];
-  }
   for (int i = static_cast<int>(clas_pair.size()) - 1; i >= 0; --i) {
-    clas_pair[--cnt[std::get<0>(clas[i])]] = {
-            std::get<0>(clas[i]), std::get<1>(clas[i]), std::get<2>(clas[i])};
+    clas_pair[--cnt2[std::get<0>(clas[i])]] = {
+        std::get<0>(clas[i]), std::get<1>(clas[i]), std::get<2>(clas[i])};
   }
 }
 
